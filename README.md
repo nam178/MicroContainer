@@ -79,3 +79,32 @@ void CloseButton_Click(object sender, EventArgs e) {
     screenContainer.Dispose();
 }
 ```
+
+# Singletons
+
+Singleton can be registered by appending Singleton(), InstancePerContainer() and InstancePerNamedContainer() to the registration.
+
+```csharp
+// Every resolve call to IDevice results in the same ILaptop instance.
+container.Register<Laptop>().As<IDevice>().Singleton();
+
+// Every Resolve() call to ISessionInfo from the same container results in the same instance.
+container.Register<SessionInfo>().As<ISessionInfo>().InstancePerContainer();
+// This should be true:
+var session = container.Create();
+Console.WriteLine(object.ReferenceEquals(session.Resolve<ISessionInfo>(), session.Resolve<ISessionInfo>()));
+
+// Every Resolve() call to ISessionInfo from contains with the same name or parent name results in the same instance.
+container.Register<ClientInfo>().As<IClientInfo>().InstancePerContainer();
+// This should be true:
+var clientViewContainer = container.Register<ClientInfo>().As<IClientInfo>().InstancePerNamedContainer("peter");
+var clientChildViewContainer = clientViewContainer.Create();
+Console.WriteLine(
+  object.ReferenceEquals(
+    clientViewContainer.Resolve<IClientInfo>(), 
+    clientChildViewContainer.Resolve<IClientInfo>()));
+
+```
+
+# Parameters
+
