@@ -106,5 +106,30 @@ Console.WriteLine(
 
 ```
 
-# Parameters
+# Parameters and Lambda registration.
 
+You can explicitly supply parameter to an registration, specifing the parameter using a match function:
+
+```csharp
+var container = Container.Create();
+
+// If MachineGune is registered as the default weapon,
+// this registration overwrites it and the player given a Sniper instead:
+container
+    .Register<PlayerController>()
+    .WithParameter(p => p.Name == "weapon", (p, c) => new Sniper());
+```
+
+Also, customizing how your weapon is contructed with lambda registration:
+
+```csharp
+
+// The Sniper is now given 150 ammo for paying players!
+container
+    .Register<Sniper>(x => new Sniper { Ammo = 150 })
+    .AsSelf()
+    .AsImplementedInterfaces()
+    ;
+ ```
+
+Happy Resolving!
