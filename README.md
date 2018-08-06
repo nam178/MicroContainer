@@ -39,3 +39,43 @@ root.Register<PlayerController>().AsSelf();
 root.Resolve<PlayerController>();
 ```
 
+# Child Containers - Unit Of Work
+
+Unit Of Work design pattern means a block of work should have a container object that holds references to services and data you need. So, after finishing the work, killing the container also frees the data and resources, avoid memory leaks.
+
+For example, you have a screen that displays data from a database connection:
+
+```csharp
+class MyScreen
+{
+    public MyScreen(MyDatabaseConnection connection) {
+    }
+}
+
+class MyDatabaseConnection : IDisposable
+{
+    public void Dispose() {
+        /* closes the database connection */
+    }
+}
+```
+
+To ensure resources used by the screen, such as MyDatabaseConnection above, are properly released when the user closes the screen, you create the screen from a child container like this:
+
+```csharp
+var screenContainer = root.Create();
+var screen = screenContainer.Resolve<MyScreen>();
+// Then, display the screen as normal
+AddToViewHierarchy(screen);
+```
+
+Notes: registrations from parent container are copied to the child container unless you overwrite them. In this case, MyScreen already registered from "root", so you don't have to register it again.
+
+Once the user is done with the screen, i.e. clicking the 'Close' button, dispose the container to release resources.
+
+```csharp
+void CloseButton_Click(object sender, EventArgs e) {
+    RemoveFromViewHierarchy(screen);
+    screenContainer.Dispose();
+}
+```
